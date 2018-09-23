@@ -58,7 +58,7 @@ def emit_events(events):
 
 @atexit.register
 def savecursor():
-    open("cursor.txt", "w").write("%s" % cursor)
+    open("cursor.txt", "w").write("%s\n" % cursor)
 
 def main():
     events = get_journal_events()
