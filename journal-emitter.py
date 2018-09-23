@@ -6,6 +6,7 @@ import json
 import atexit
 import sys
 import signal
+import argparse
 
 # Configuration
 JOURNALCTL = '/bin/journalctl'
@@ -13,6 +14,7 @@ REMOVE_FIELDS = ('__MONOTONIC_TIMESTAMP', '_SOURCE_MONOTONIC_TIMESTAMP')
 
 # State
 cursor = None
+statefile = None
 
 class GracefulExit(Exception):
     pass
@@ -25,13 +27,15 @@ def signal_handler(signum, frame):
     sys.stdout.write("%s\n" % message)
     raise GracefulExit()
 
-def get_journal_events():
+def get_journal_events(start_cursor = None):
     """Run journalctl, optionally with a cursor file, and yield lines
     """
+    args = [JOURNALCTL, '-f', '-o', 'json']
+    if start_cursor is not None:
+        args.extend(['--after-cursor', start_cursor])
+
     try:
-        journalctl = subprocess.Popen(
-            [JOURNALCTL, '-f', '-o', 'json'],
-            stdout=subprocess.PIPE)
+        journalctl = subprocess.Popen(args,  stdout=subprocess.PIPE)
     except OSError as e:
         sys.exit("Failed to execute program '%s': %s" % (JOURNALCTL, str(e)))
 
@@ -68,11 +72,36 @@ def print_events(events):
 
 @atexit.register
 def savecursor():
-    open("cursor.txt", "w").write("%s\n" % cursor)
+    if cursor is not None:
+        with open (statefile, 'w+') as f:
+            f.write("%s\n" % cursor)
+
+def readcursor():
+    if os.path.exists(statefile):
+        with open(statefile, 'r') as f:
+            c = f.readline()
+            if len(c) > 0:
+                return c
+            else:
+                return None
+    else:
+        return None
+
+def handle_arguments():
+    parser = argparse.ArgumentParser(description='Tail the systemd journal, with resume state')
+    parser.add_argument('statefile', type=str,
+                        help="File used for storing the last printed journal event. It is read on start, and this script will resume printing from there.")
+    args = parser.parse_args()
+    return args
 
 def main():
+    args = handle_arguments()
+    global statefile
+    statefile = args.statefile
+
     try:
-        events = get_journal_events()
+        cursor = readcursor()
+        events = get_journal_events(cursor)
         events = convert_to_json(events)
         events = filter_events(events)
         print_events(events)
