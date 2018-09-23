@@ -41,7 +41,6 @@ def update_cursor(events):
     global cursor
     for event in events:
         cursor = event.pop("__CURSOR", None)
-        yield event
 
 def filter_events(events):
     """Remove unwanted fields.
@@ -55,6 +54,7 @@ def emit_events(events):
     for event in events:
         line = json.dumps(event)
         print(line)
+        yield event
 
 @atexit.register
 def savecursor():
@@ -63,9 +63,9 @@ def savecursor():
 def main():
     events = get_journal_events()
     events = convert_to_json(events)
-    events = update_cursor(events)
     events = filter_events(events)
-    emit_events(events)
+    events = emit_events(events)
+    update_cursor(events)
 
 if __name__ == "__main__":
     main()
