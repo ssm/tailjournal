@@ -21,7 +21,7 @@ def signal_handler(signum, frame):
 
 JOURNALCTL = '/bin/journalctl'
 cursor = None
-remove_fields = ('__REALTIME_TIMESTAMP', '__MONOTONIC_TIMESTAMP')
+remove_fields = ('__MONOTONIC_TIMESTAMP', '_SOURCE_MONOTONIC_TIMESTAMP')
 
 def get_journal_events():
     """Run journalctl, optionally with a cursor file, and yield lines
