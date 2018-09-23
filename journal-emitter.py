@@ -5,6 +5,7 @@ import subprocess
 import select
 import json
 import atexit
+import sys
 
 JOURNALCTL = '/bin/journalctl'
 cursor = None
@@ -13,9 +14,13 @@ remove_fields = ('__REALTIME_TIMESTAMP', '__MONOTONIC_TIMESTAMP')
 def get_journal_events():
     """Run journalctl, optionally with a cursor file, and yield lines
     """
-    journalctl = subprocess.Popen(
-        [JOURNALCTL, '-f', '-o', 'json'],
-        stdout=subprocess.PIPE)
+    try:
+        journalctl = subprocess.Popen(
+            [JOURNALCTL, '-f', '-o', 'json'],
+            stdout=subprocess.PIPE)
+    except OSError as e:
+        sys.exit("Failed to execute program '%s': %s" % (JOURNALCTL, str(e)))
+
     while True:
         line = journalctl.stdout.readline()
         if not line:
