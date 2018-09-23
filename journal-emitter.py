@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import select
 import json
 import atexit
 import sys
