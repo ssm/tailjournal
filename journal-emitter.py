@@ -46,14 +46,6 @@ def convert_to_json(lines):
         event = json.loads(line)
         yield event
 
-def update_cursor(events):
-    """For each event, read the last cursor, and update the global cursor
-    variable.
-    """
-    global cursor
-    for event in events:
-        cursor = event.pop("__CURSOR", None)
-
 def filter_events(events):
     """Remove unwanted fields.
     """
@@ -62,11 +54,15 @@ def filter_events(events):
             event.pop(field, None)
         yield event
 
-def emit_events(events):
+def print_events(events):
+    """Print events to stdout, and store the cursor of the last printed event.
+    """
+    global cursor
     for event in events:
+        _cursor = event.pop("__CURSOR", None)
         line = json.dumps(event)
         print(line)
-        yield event
+        cursor = _cursor
 
 @atexit.register
 def savecursor():
@@ -77,8 +73,7 @@ def main():
         events = get_journal_events()
         events = convert_to_json(events)
         events = filter_events(events)
-        events = emit_events(events)
-        update_cursor(events)
+        print_events(events)
     except GracefulExit:
         pass
     sys.exit(0)
