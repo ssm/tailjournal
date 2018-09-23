@@ -6,6 +6,7 @@ import select
 import json
 import atexit
 
+JOURNALCTL = '/bin/journalctl'
 cursor = None
 remove_fields = ('__REALTIME_TIMESTAMP', '__MONOTONIC_TIMESTAMP')
 
@@ -13,7 +14,7 @@ def get_journal_events():
     """Run journalctl, optionally with a cursor file, and yield lines
     """
     journalctl = subprocess.Popen(
-        ['/usr/bin/journalctl', '-f', '-o', 'json'],
+        [JOURNALCTL, '-f', '-o', 'json'],
         stdout=subprocess.PIPE)
     while True:
         line = journalctl.stdout.readline()
