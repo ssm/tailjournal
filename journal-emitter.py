@@ -41,7 +41,6 @@ def update_cursor(events):
 def filter_events(events):
     """Remove unwanted fields.
     """
-    global remove_fields
     for event in events:
         for field in remove_fields:
             event.pop(field, None)
@@ -54,7 +53,6 @@ def emit_events(events):
 
 @atexit.register
 def savecursor():
-    global cursor
     open("cursor.txt", "w").write("%s" % cursor)
 
 def main():
