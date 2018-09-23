@@ -8,6 +8,13 @@ import atexit
 import sys
 import signal
 
+# Configuration
+JOURNALCTL = '/bin/journalctl'
+REMOVE_FIELDS = ('__MONOTONIC_TIMESTAMP', '_SOURCE_MONOTONIC_TIMESTAMP')
+
+# State
+cursor = None
+
 class GracefulExit(Exception):
     pass
 
@@ -18,10 +25,6 @@ def signal_handler(signum, frame):
         message="Shutdown requested, exiting..."
     sys.stdout.write("%s\n" % message)
     raise GracefulExit()
-
-JOURNALCTL = '/bin/journalctl'
-cursor = None
-remove_fields = ('__MONOTONIC_TIMESTAMP', '_SOURCE_MONOTONIC_TIMESTAMP')
 
 def get_journal_events():
     """Run journalctl, optionally with a cursor file, and yield lines
@@ -50,7 +53,7 @@ def filter_events(events):
     """Remove unwanted fields.
     """
     for event in events:
-        for field in remove_fields:
+        for field in REMOVE_FIELDS:
             event.pop(field, None)
         yield event
 
