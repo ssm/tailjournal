@@ -6,6 +6,18 @@ import select
 import json
 import atexit
 import sys
+import signal
+
+class GracefulExit(Exception):
+    pass
+
+def signal_handler(signum, frame):
+    if signum in [signal.SIGCHLD]:
+        message="End of input from journalctl, exiting..."
+    else:
+        message="Shutdown requested, exiting..."
+    sys.stdout.write("%s\n" % message)
+    raise GracefulExit()
 
 JOURNALCTL = '/bin/journalctl'
 cursor = None
@@ -61,11 +73,18 @@ def savecursor():
     open("cursor.txt", "w").write("%s\n" % cursor)
 
 def main():
-    events = get_journal_events()
-    events = convert_to_json(events)
-    events = filter_events(events)
-    events = emit_events(events)
-    update_cursor(events)
+    try:
+        events = get_journal_events()
+        events = convert_to_json(events)
+        events = filter_events(events)
+        events = emit_events(events)
+        update_cursor(events)
+    except GracefulExit:
+        pass
+    sys.exit(0)
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGCHLD, signal_handler)
     main()
