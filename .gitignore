@@ -1,2 +1,4 @@
+build/
 .tox
-cursor.txt
+*.egg-info
+*.pyc
