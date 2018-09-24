@@ -95,6 +95,10 @@ def handle_arguments():
     return args
 
 def main():
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGCHLD, signal_handler)
+
     args = handle_arguments()
     global statefile
     statefile = args.statefile
@@ -110,7 +114,4 @@ def main():
     sys.exit(0)
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGCHLD, signal_handler)
     main()
