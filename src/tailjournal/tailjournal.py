@@ -16,17 +16,6 @@ REMOVE_FIELDS = ('__MONOTONIC_TIMESTAMP', '_SOURCE_MONOTONIC_TIMESTAMP')
 cursor = None
 statefile = None
 
-class GracefulExit(Exception):
-    pass
-
-def signal_handler(signum, frame):
-    if signum in [signal.SIGCHLD]:
-        message="End of input from journalctl, exiting..."
-    else:
-        message="Shutdown requested, exiting..."
-    sys.stdout.write("%s\n" % message)
-    raise GracefulExit()
-
 def get_journal_events(start_cursor = None):
     """Run journalctl, optionally with a cursor file, and yield lines
     """
@@ -109,9 +98,10 @@ def main():
         events = convert_to_json(events)
         events = filter_events(events)
         print_events(events)
-    except GracefulExit:
-        pass
-    sys.exit(0)
+    except KeyboardInterrupt:
+        sys.stderr.write("Shutdown requested, exiting...")
+    finally:
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
