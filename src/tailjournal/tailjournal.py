@@ -5,7 +5,6 @@ import subprocess
 import json
 import atexit
 import sys
-import signal
 import argparse
 
 # Configuration
@@ -84,10 +83,6 @@ def handle_arguments():
     return args
 
 def main():
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGCHLD, signal_handler)
-
     args = handle_arguments()
     global statefile
     statefile = args.statefile
