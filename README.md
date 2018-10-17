@@ -1,5 +1,7 @@
-journal-emitter
-===============
+tailjournal
+===========
+
+(work in progress)
 
 Tail the systemd journal, keeping track of the location in the journal last
 sent to stdout.
