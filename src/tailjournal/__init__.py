@@ -1,1 +1,1 @@
-from tailjournal import *
+from tailjournal.tailjournal import *
