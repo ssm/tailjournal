@@ -76,9 +76,9 @@ def readcursor():
         return None
 
 def handle_arguments():
-    parser = argparse.ArgumentParser(description='Tail the systemd journal, with resume state')
+    parser = argparse.ArgumentParser(description='Tail the systemd journal, printing json lines.  On exit, store a reference to the last line printed, and resume from there on the next invocation.')
     parser.add_argument('statefile', type=str,
-                        help="File used for storing the last printed journal event. It is read on start, and this script will resume printing from there.")
+                        help="File used for storing a reference to the last printed journal event.")
     args = parser.parse_args()
     return args
 
